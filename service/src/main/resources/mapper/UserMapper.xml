@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coffeeApp.mapper.UserMapper">
+
+    <!-- メールアドレスでユーザー情報を取得 -->
+    <select id="findByMailAddress" resultType="com.coffeeApp.dto.User">
+        SELECT mail_address AS mailAddress, password
+        FROM users
+        WHERE mail_address = #{mailAddress}
+    </select>
+    
+    <!-- ユーザー情報を挿入 -->
+    <insert id="insertUser">
+        INSERT INTO users (mail_address, password)
+        VALUES (#{mailAddress}, #{password});
+    </insert>
+
+</mapper>

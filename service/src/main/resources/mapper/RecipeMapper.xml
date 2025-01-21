@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coffeeApp.mapper.RecipeMapper">
+
+    <resultMap id="recipeResultMap" type="com.coffeeApp.dto.Recipe">
+        <id property="id" column="recipe_id"/>
+        <result property="title" column="title"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="brewingMethod" column="brewing_method"/>
+        <result property="roastLevel" column="roast_level"/>
+        <result property="beanAmount" column="bean_amount"/>
+        <result property="grindSize" column="grind_size"/>
+        <result property="waterTemp" column="water_temp"/>
+        <result property="authorMailAddress" column="author_mail_address"/>
+        <result property="favoriteCount" column="favorite_count"/>
+        <result property="isFavorited" column="is_favorited"/>
+        <collection property="steps" ofType="com.coffeeApp.dto.RecipeStep">
+            <id property="id" column="step_id"/>
+            <result property="startTime" column="start_time"/>
+            <result property="endTime" column="end_time"/>
+            <result property="waterAmount" column="water_amount"/>
+        </collection>
+    </resultMap>
+
+    <select id="getRecipesWithDetails" resultMap="recipeResultMap">
+        SELECT
+            r.id AS recipe_id,
+            r.title,
+            r.created_at,
+            r.brewing_method,
+            r.roast_level,
+            r.bean_amount,
+            r.grind_size,
+            r.water_temp,
+            r.author_mail_address,
+            rs.id AS step_id,
+            rs.start_time,
+            rs.end_time,
+            rs.water_amount,
+            COUNT(f.recipe_id) OVER(PARTITION BY r.id) AS favorite_count,
+            CASE 
+                WHEN #{emailAddress} IS NOT NULL AND EXISTS (
+                    SELECT 1 
+                    FROM favorites f2 
+                    WHERE f2.recipe_id = r.id AND f2.user_mail_address = #{emailAddress}
+                ) THEN TRUE
+                ELSE FALSE
+            END AS is_favorited
+        FROM 
+            recipes r
+        LEFT JOIN 
+            recipe_steps rs ON r.id = rs.recipe_id
+        LEFT JOIN 
+            favorites f ON r.id = f.recipe_id
+        ORDER BY 
+            r.created_at DESC, rs.start_time;
+    </select>
+
+</mapper>
