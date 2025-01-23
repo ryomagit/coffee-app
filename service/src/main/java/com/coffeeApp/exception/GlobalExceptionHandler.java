@@ -1,5 +1,8 @@
 package com.coffeeApp.exception;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -7,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -28,6 +32,14 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(BusinessException.class)
 	public ResponseEntity<?> handleBusinessException(BusinessException ex) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+	}
+
+	@ExceptionHandler(ExpiredJwtException.class)
+	public ResponseEntity<Map<String, String>> handleExpiredJwtException(ExpiredJwtException ex) {
+		Map<String, String> errorResponse = new HashMap<>();
+		errorResponse.put("message", "Token has expired");
+		errorResponse.put("error", "Unauthorized");
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
 	}
 
 	// その他の例外

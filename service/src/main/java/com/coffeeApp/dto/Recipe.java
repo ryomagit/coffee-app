@@ -15,7 +15,7 @@ public class Recipe {
 	private int beanAmount;
 	private int grindSize;
 	private int waterTemp;
-	private String authorMailAddress;
+	//	private String authorMailAddress;
 	private int favoriteCount;
 	private boolean isFavorited;
 	private List<RecipeStep> steps;

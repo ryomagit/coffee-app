@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { parseCoffeeRecipe } from "../utils/Util";
 import RecipeModal from "./RecipeModal";
 import RecipeCard from "./RecipeCard";
+import postRequest from "../utils/HttpUtil";
 
 // 仮のデータ
 const mockData = [
@@ -41,8 +42,12 @@ const mockData = [
     createdAt: "2023-12-24T14:00:00Z",
   },
 ];
+interface OriginalProps {
+  isLogin: boolean;
+}
 
-const All: React.FC = () => {
+const All: React.FC<OriginalProps> = (props) => {
+  const { isLogin } = props;
   const [recipes, setRecipes] = useState<CoffeeRecipe[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<CoffeeRecipe | null>(
     null
@@ -51,18 +56,15 @@ const All: React.FC = () => {
 
   // サーバーからレシピを取得
   useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
-        //   const response = await axios.get("https://api.example.com/recipes");
-        //   setRecipes(response.data); // レスポンスに基づいてデータをセット
-        const parsedRecipes = mockData.map((data) => parseCoffeeRecipe(data));
-        setRecipes(parsedRecipes);
-      } catch (error) {
-        console.error("Error fetching recipes:", error);
+    postRequest(
+      "http://localhost:8080/api/public/all",
+      undefined,
+      (resData: CoffeeRecipe[]) => {
+        console.dir(resData);
+        setRecipes(resData);
       }
-    };
-    fetchRecipes();
-  }, []);
+    );
+  }, [isLogin]);
 
   // モーダルを開く
   const handleCardClick = (recipe: CoffeeRecipe) => {
@@ -79,7 +81,7 @@ const All: React.FC = () => {
   return (
     <Box sx={{ padding: 3, display: "flex", flexWrap: "wrap", gap: 3 }}>
       {recipes.map((recipe) => (
-        <RecipeCard recipe={recipe} onClick={handleCardClick} />
+        <RecipeCard key={recipe.id} recipe={recipe} onClick={handleCardClick} />
       ))}
 
       {/* モーダル */}
@@ -88,6 +90,8 @@ const All: React.FC = () => {
           open={modalOpen}
           onClose={handleCloseModal}
           selectedRecipe={selectedRecipe}
+          setRecipes={setRecipes}
+          isLogin={isLogin}
         />
       )}
     </Box>

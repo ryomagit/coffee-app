@@ -7,7 +7,7 @@ import {
   Button,
   ModalOwnProps,
 } from "@mui/material";
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import {
   brewingMethodLabels,
   roastLevelLabels,
@@ -17,15 +17,32 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import CloseIcon from "@mui/icons-material/Close";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { getBackgroundStyle } from "../utils/Util";
+import postRequest from "../utils/HttpUtil";
 
 interface RecipeModalProps {
   open: boolean;
   onClose: () => void;
   selectedRecipe: CoffeeRecipe;
+  setRecipes: Dispatch<SetStateAction<CoffeeRecipe[]>>;
+  isLogin: boolean;
 }
 
 const RecipeModal: React.FC<RecipeModalProps> = (props) => {
-  const { open, onClose, selectedRecipe, ...rest } = props;
+  const { open, onClose, selectedRecipe, isLogin, ...rest } = props;
+
+  const handleFavorite = (recipeId: number, favorited: boolean) => {
+    const requestBody = {
+      recipeId,
+      favorited,
+    };
+    postRequest(
+      "http://localhost:8080/api/private/favorite",
+      requestBody,
+      (resData: CoffeeRecipe[]) => {
+        console.dir(resData);
+      }
+    );
+  };
   return (
     <Modal open={open} onClose={onClose}>
       <Box
@@ -138,30 +155,41 @@ const RecipeModal: React.FC<RecipeModalProps> = (props) => {
             ))}
           </Box>
 
-          <Box sx={{ display: "flex", justifyContent: "right", gap: 1 }}>
-            <Button
-              size="medium"
-              startIcon={<FavoriteBorderIcon />}
-              sx={{
-                color: "#fff",
-                marginTop: 2,
-                borderColor: "rgba(255, 255, 255, 0.5)",
-              }}
-            >
-              Add Favorites
-            </Button>
-            <Button
-              size="medium"
-              startIcon={<FavoriteIcon />}
-              sx={{
-                color: "#fff",
-                marginTop: 2,
-                borderColor: "rgba(255, 255, 255, 0.5)",
-              }}
-            >
-              Remove from Favorites
-            </Button>
-          </Box>
+          {isLogin && (
+            <Box sx={{ display: "flex", justifyContent: "right", gap: 1 }}>
+              {!selectedRecipe.favorited ? (
+                <Button
+                  size="medium"
+                  startIcon={<FavoriteBorderIcon />}
+                  sx={{
+                    color: "#fff",
+                    marginTop: 2,
+                    borderColor: "rgba(255, 255, 255, 0.5)",
+                  }}
+                  onClick={() =>
+                    handleFavorite(selectedRecipe.id, selectedRecipe.favorited)
+                  }
+                >
+                  Add Favorites
+                </Button>
+              ) : (
+                <Button
+                  size="medium"
+                  startIcon={<FavoriteIcon />}
+                  sx={{
+                    color: "#fff",
+                    marginTop: 2,
+                    borderColor: "rgba(255, 255, 255, 0.5)",
+                  }}
+                  onClick={() =>
+                    handleFavorite(selectedRecipe.id, selectedRecipe.favorited)
+                  }
+                >
+                  Remove from Favorites
+                </Button>
+              )}
+            </Box>
+          )}
         </Box>
       </Box>
     </Modal>

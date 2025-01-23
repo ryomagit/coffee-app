@@ -77,7 +77,7 @@ const LoginForm: React.FC<OriginalProps> = ({ handleClose, setIsLogin }) => {
         "http://localhost:8080/api/public/login",
         body,
         (resData: any) => {
-          sessionStorage.setItem("authToken", resData);
+          sessionStorage.setItem("authToken", resData.accessToken);
           setIsLogin(true);
           handleClose();
         }

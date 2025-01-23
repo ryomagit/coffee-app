@@ -5,8 +5,10 @@ import java.util.Collections;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,25 +23,35 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.coffeeApp.security.CustomUserDetailsServiceImpl;
 import com.coffeeApp.security.JwtAuthenticationFilter;
+import com.coffeeApp.security.JwtUtil;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	private final JwtUtil jwtUtil;
 
-	public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
-		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+	public SecurityConfig(JwtUtil jwtUtil) {
+		this.jwtUtil = jwtUtil;
 	}
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
+				.exceptionHandling(exception -> exception
+						.authenticationEntryPoint((request, response, authException) -> {
+							response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+							response.getWriter().write("Unauthorized: Token required");
+							response.getWriter().flush();
+						}))
 				// CSRFの無効化（REST APIに適している設定）
 				.csrf(csrf -> csrf.disable())
 
 				// 認可の設定
 				.authorizeHttpRequests(auth -> auth
+						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // OPTIONS リクエストを許可
 						.requestMatchers("/api/public/**").permitAll() // 認証不要
 						.requestMatchers("/h2-console/**").permitAll() // H2コンソールへのアクセス許可
 						.requestMatchers("/api/private/**").authenticated() // 認証必要
@@ -47,11 +59,13 @@ public class SecurityConfig {
 				// セッションを無効化（Stateless設定）
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-				// フレームオプション無効化（H2コンソール用、新しいAPI）
+				.cors(Customizer.withDefaults())
+
+				// フレームオプション無効化（H2コンソール用）
 				.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
 
 				// JWT認証フィルターを追加
-				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+				.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 	}
@@ -66,6 +80,11 @@ public class SecurityConfig {
 		AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
 		builder.authenticationProvider(authenticationProvider);
 		return builder.build();
+	}
+
+	@Bean
+	public JwtAuthenticationFilter jwtAuthenticationFilter() {
+		return new JwtAuthenticationFilter(jwtUtil);
 	}
 
 	@Bean

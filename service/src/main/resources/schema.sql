@@ -45,3 +45,5 @@ CREATE TABLE favorites (
     CONSTRAINT fk_favorite FOREIGN KEY (recipe_id) REFERENCES recipes (id) ON DELETE CASCADE
 );
 
+Insert INTO favorites (user_mail_address,recipe_id,favorited_at) VALUES('example@example.com',1,now());
+

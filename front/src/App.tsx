@@ -3,11 +3,8 @@ import {
   AppBar,
   Box,
   Button,
-  Card,
-  CardContent,
   Container,
   createTheme,
-  Modal,
   Tab,
   Tabs,
   ThemeProvider,
@@ -15,11 +12,13 @@ import {
   Typography,
 } from "@mui/material";
 import CoffeeMakerRoundedIcon from "@mui/icons-material/CoffeeMakerRounded";
-import FormCard from "./components/FormCard";
+import FormModal from "./components/FormModal";
 import "./App.css";
 import All from "./components/All";
 import Favorite from "./components/Favorite";
 import MyRecipe from "./components/MyRecipe";
+import LogoutModal from "./components/LogoutModal";
+import AlertModal from "./components/AlertModal";
 
 const getCSSVariable = (variable: string) => {
   let value = getComputedStyle(document.documentElement)
@@ -76,18 +75,34 @@ const MainPage: React.FC = () => {
       },
     },
   });
+
   /**ログイン有無state */
   const [isLogin, setIsLogin] = useState<boolean>(false);
   /**タブ制御state */
   const [activeTag, setActiveTag] = useState<number>(0);
   /**タブ変更関数 */
   const handelTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setActiveTag(newValue);
+    if ((newValue == 1 || newValue == 2) && !isLogin) {
+      setAlertInfo((prev) => ({
+        ...prev,
+        open: true,
+        alertType: "warning",
+        message: "You need to log in to access this feature.",
+      }));
+    } else {
+      setActiveTag(newValue);
+    }
   };
   /**ログインモーダル制御state */
   const [loginOpen, setLoginOpen] = useState<boolean>(false);
   /**ログアウト確認モーダル制御state */
   const [logoutOpen, setLogoutOpen] = useState<boolean>(false);
+  /**アラートモーダルstate */
+  const [alertInfo, setAlertInfo] = useState<AlertInfo>({
+    open: false,
+    alertType: "info",
+    message: "",
+  });
 
   const handleLogout = () => {
     sessionStorage.removeItem("authToken"); // トークンを削除
@@ -169,74 +184,24 @@ const MainPage: React.FC = () => {
       </Box>
       <Container maxWidth="xl" sx={{ paddingX: 1 }}>
         <Box flexGrow={1} sx={{ paddingLeft: 1 }}>
-          {activeTag == 0 && <All />}
+          {activeTag == 0 && <All isLogin={isLogin} />}
           {activeTag == 1 && <Favorite />}
           {activeTag == 2 && <MyRecipe />}
         </Box>
 
-        <Modal open={loginOpen} aria-labelledby="login-modal-title">
-          <FormCard
-            open={loginOpen}
-            handleClose={() => setLoginOpen(false)}
-            setIsLogin={setIsLogin}
-          />
-        </Modal>
+        <FormModal
+          open={loginOpen}
+          handleClose={() => setLoginOpen(false)}
+          setIsLogin={setIsLogin}
+        />
 
-        {logoutOpen && (
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 400,
-              bgcolor: "background.paper",
-              boxShadow: 24,
-              borderRadius: 2,
-            }}
-          >
-            {/* Cardでログイン画面 */}
-            <Card>
-              <CardContent>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Typography
-                    variant="h6"
-                    component="div"
-                    sx={{
-                      fontSize: "1.2rem",
-                      fontWeight: "bold",
-                      marginRight: 1,
-                    }}
-                  >
-                    Coffee Recipe
-                  </Typography>
-                  <CoffeeMakerRoundedIcon sx={{ color: "#000000d1" }} />
-                </Box>
-                <p>Are you sure you want to log out?</p>
-                <Button
-                  variant="contained"
-                  size="medium"
-                  onClick={handleLogout}
-                >
-                  OK
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  onClick={() => setLogoutOpen(false)}
-                >
-                  Cancel
-                </Button>
-              </CardContent>
-            </Card>
-          </Box>
-        )}
+        <LogoutModal
+          handleLogout={handleLogout}
+          open={logoutOpen}
+          setOpen={setLogoutOpen}
+        />
+
+        <AlertModal alertInfo={alertInfo} setAlertInfo={setAlertInfo} />
       </Container>
     </ThemeProvider>
   );
