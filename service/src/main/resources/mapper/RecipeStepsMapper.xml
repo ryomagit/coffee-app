@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coffeeApp.mapper.RecipeStepsMapper">
+	<delete id="deleteRecipeStepByRecipeId" parameterType="int">
+        DELETE FROM recipe_steps
+        WHERE recipe_id = #{recipeId}
+    </delete>
+	<insert id="insertRecipeSteps" parameterType="java.util.List">
+	    INSERT INTO recipe_steps (recipe_id, start_time, water_amount)
+	    VALUES
+	    <foreach collection="list" item="step" separator=",">
+	        (#{step.recipeId}, #{step.startTime}, #{step.waterAmount})
+	    </foreach>
+	</insert>
+	<insert id="upsertRecipeSteps" parameterType="java.util.List">
+    <foreach collection="list" item="step" separator=";">
+        MERGE INTO recipe_steps AS rs
+        USING (VALUES (#{step.id}, #{step.recipeId}, #{step.startTime}, #{step.waterAmount}))
+        AS vals (id, recipe_id, start_time, water_amount)
+        ON rs.id = vals.id
+        WHEN MATCHED THEN
+            UPDATE SET start_time = vals.start_time, water_amount = vals.water_amount
+        WHEN NOT MATCHED THEN
+            INSERT (id, recipe_id, start_time, water_amount)
+            VALUES (vals.id, vals.recipe_id, vals.start_time, vals.water_amount);
+    </foreach>
+</insert>
+</mapper>

@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 public class JwtUtil {
 
 	private final long expirationTime = 600000; // 10分
+	//	private final long expirationTime = 60000; // 1分
 	private final long longExpirationTime = 3600000; //1時間
 
 	private final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";

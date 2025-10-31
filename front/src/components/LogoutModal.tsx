@@ -53,17 +53,33 @@ const LogoutModal: React.FC<OriginalProps> = (props) => {
               </Typography>
               <CoffeeMakerRoundedIcon sx={{ color: "#000000d1" }} />
             </Box>
-            <p>Are you sure you want to log out?</p>
-            <Button variant="contained" size="medium" onClick={handleLogout}>
-              OK
-            </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => setOpen(false)}
+
+            <p style={{ textAlign: "center" }}>
+              Are you sure you want to log out?
+            </p>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: 2,
+              }}
             >
-              Cancel
-            </Button>
+              <Button
+                variant="contained"
+                size="medium"
+                sx={{ marginRight: 2 }}
+                onClick={handleLogout}
+              >
+                OK
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => setOpen(false)}
+              >
+                Cancel
+              </Button>
+            </Box>
           </CardContent>
         </Card>
       </Box>

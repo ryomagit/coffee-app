@@ -27,22 +27,21 @@ const LoginForm: React.FC<OriginalProps> = ({ handleClose, setIsLogin }) => {
 
     if (!value) {
       error =
-        name === "emailAddress"
+        name === "mailAddress"
           ? ERROR_MESSAGES.mailaddress_1
           : ERROR_MESSAGES.password_1;
-    } else if (name === "emailAddress") {
+    } else if (name === "mailAddress") {
       // mailAddressのバリデーション
       const emailAddressRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailAddressRegex.test(value)) {
         error = ERROR_MESSAGES.mailaddress_2;
       }
     } else if (name === "password") {
-      //   // Passwordのバリデーション
-      //   const passwordRegex =
-      //     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[_@$!%*#?&])[A-Za-z\d_@$!%*#?&]{8,16}$/;
-      //   if (!passwordRegex.test(value)) {
-      //     error = ERROR_MESSAGES.password_2;
-      //   }
+      // Passwordのバリデーション
+      const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,16}$/;
+      if (!passwordRegex.test(value)) {
+        error = ERROR_MESSAGES.password_2;
+      }
     }
 
     setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));

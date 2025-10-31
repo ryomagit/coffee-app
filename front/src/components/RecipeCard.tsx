@@ -18,7 +18,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
     <Card
       key={recipe.id}
       sx={{
-        width: 300,
+        width: "100%",
+        maxWidth: 300,
         height: 220, // 高さを調整
         boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
         borderRadius: 2,

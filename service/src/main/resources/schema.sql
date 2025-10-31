@@ -3,7 +3,7 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL
 );
 
-INSERT INTO users (mail_address, password) VALUES ('example@example.com', '$2a$10$lUQMdmdVRtkeq5ekCuSwkuzsFz5v9SbgTCIjmJbJvuscOLHsFK5pC');
+INSERT INTO users (mail_address, password) VALUES ('example@example.com', '$2a$10$lUQMdmdVRtkeq5ekCuSwkuzsFz5v9SbgTCIjmJbJvuscOLHsFK5pC'),('fortest@example.com', '$2a$10$lUQMdmdVRtkeq5ekCuSwkuzsFz5v9SbgTCIjmJbJvuscOLHsFK5pC');
 
 -- recipes テーブル
 CREATE TABLE recipes (
@@ -21,19 +21,18 @@ CREATE TABLE recipes (
 );
 
 Insert INTO recipes (created_at, title,memo,brewing_method,roast_level,bean_amount,grind_size,water_temp,author_mail_address)
- VALUES (now(), 'Morning Pour-Over', 'A light and balanced cup, perfect for mornings.', 1, 3, 20, 1, 95, 'example@example.com');
+ VALUES (now(), 'Morning Pour-Over', 'A light and balanced cup, perfect for mornings.', 1, 1, 20, 1, 95, 'example@example.com'),(now(), 'Midnight Pour-Over', 'A dark and deep cup, perfect for nights.', 1, 3, 20, 1, 97, 'fortest@example.com');
 
 -- レシピのステップテーブル
 CREATE TABLE recipe_steps (
     id SERIAL PRIMARY KEY,              -- 自動生成されるステップの ID
     recipe_id INTEGER NOT NULL,         -- 紐付くレシピの ID
     start_time VARCHAR(5) NOT NULL,     -- mm:ss 形式の開始時間
-    end_time VARCHAR(5) NOT NULL,       -- mm:ss 形式の終了時間
     water_amount INTEGER NOT NULL,        -- 湯量（mL）
     CONSTRAINT fk_recipe FOREIGN KEY (recipe_id) REFERENCES recipes (id) ON DELETE CASCADE
 );
 
-Insert INTO recipe_steps (recipe_id, start_time, end_time, water_amount) VALUES (1, '00:00','00:30',30),(1,'00:30','01:10',60);
+Insert INTO recipe_steps (recipe_id, start_time, water_amount) VALUES (1, '00:00',30),(1,'00:30',60),(2, '00:00',30),(2,'00:40',80);
 
 -- お気に入りテーブル
 CREATE TABLE favorites (

@@ -80,6 +80,8 @@ const MainPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState<boolean>(false);
   /**タブ制御state */
   const [activeTag, setActiveTag] = useState<number>(0);
+  /**レシピstate */
+  const [recipes, setRecipes] = useState<CoffeeRecipe[]>([]);
   /**タブ変更関数 */
   const handelTabChange = (_: React.SyntheticEvent, newValue: number) => {
     if ((newValue == 1 || newValue == 2) && !isLogin) {
@@ -184,9 +186,15 @@ const MainPage: React.FC = () => {
       </Box>
       <Container maxWidth="xl" sx={{ paddingX: 1 }}>
         <Box flexGrow={1} sx={{ paddingLeft: 1 }}>
-          {activeTag == 0 && <All isLogin={isLogin} />}
-          {activeTag == 1 && <Favorite />}
-          {activeTag == 2 && <MyRecipe />}
+          {activeTag == 0 && (
+            <All isLogin={isLogin} recipes={recipes} setRecipes={setRecipes} />
+          )}
+          {activeTag == 1 && (
+            <Favorite recipes={recipes} setRecipes={setRecipes} />
+          )}
+          {activeTag == 2 && (
+            <MyRecipe recipes={recipes} setRecipes={setRecipes} />
+          )}
         </Box>
 
         <FormModal

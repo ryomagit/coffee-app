@@ -1,68 +1,23 @@
 import { Box } from "@mui/material";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { parseCoffeeRecipe } from "../utils/Util";
 import RecipeModal from "./RecipeModal";
 import RecipeCard from "./RecipeCard";
 
-// 仮のデータ
-const mockData = [
-  {
-    id: "1",
-    title: "Morning Pour-Over",
-    memo: "A light and balanced cup, perfect for mornings.",
-    favoriteCount: 120,
-    brewingMethod: 1,
-    roastLevel: 3,
-    beanAmount: 20,
-    grindSize: 1,
-    waterTemp: 95,
-    steps: [
-      { startTime: "00:00", endTime: "00:30", waterAmount: 50 },
-      { startTime: "00:30", endTime: "01:00", waterAmount: 100 },
-      { startTime: "01:00", endTime: "01:30", waterAmount: 100 },
-    ],
-    createdAt: "2023-12-25T10:00:00Z",
-  },
-  {
-    id: "2",
-    title: "Afternoon Espresso",
-    memo: "Rich and bold, perfect for a mid-day boost.",
-    favoriteCount: 85,
-    brewingMethod: 2,
-    roastLevel: 5,
-    beanAmount: 18,
-    grindSize: 1,
-    waterTemp: 95,
-    steps: [
-      { startTime: "00:00", endTime: "00:20", waterAmount: 30 },
-      { startTime: "00:20", endTime: "00:40", waterAmount: 60 },
-    ],
-    createdAt: "2023-12-24T14:00:00Z",
-  },
-];
+interface originalProps {
+  recipes: CoffeeRecipe[];
+  setRecipes: Dispatch<SetStateAction<CoffeeRecipe[]>>;
+}
 
-const Favorite: React.FC = () => {
-  const [recipes, setRecipes] = useState<CoffeeRecipe[]>([]);
+const Favorite: React.FC<originalProps> = (props) => {
+  const { recipes, setRecipes } = props;
   const [selectedRecipe, setSelectedRecipe] = useState<CoffeeRecipe | null>(
     null
   );
   const [modalOpen, setModalOpen] = useState(false);
 
-  // サーバーからレシピを取得
-  useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
-        //   const response = await axios.get("https://api.example.com/recipes");
-        //   setRecipes(response.data); // レスポンスに基づいてデータをセット
-        const parsedRecipes = mockData.map((data) => parseCoffeeRecipe(data));
-        setRecipes(parsedRecipes);
-      } catch (error) {
-        console.error("Error fetching recipes:", error);
-      }
-    };
-    fetchRecipes();
-  }, []);
+  const favoritedRecipes = recipes.filter((recipe) => recipe.isFavorited);
 
   // モーダルを開く
   const handleCardClick = (recipe: CoffeeRecipe) => {
@@ -77,9 +32,21 @@ const Favorite: React.FC = () => {
   };
 
   return (
-    <Box sx={{ padding: 3, display: "flex", flexWrap: "wrap", gap: 3 }}>
-      {recipes.map((recipe) => (
-        <RecipeCard recipe={recipe} onClick={handleCardClick} />
+    <Box
+      sx={{
+        padding: 3,
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "1fr", // スマホ
+          sm: "repeat(2, 1fr)", // タブレット
+          md: "repeat(3, 1fr)", // PC
+        },
+        gap: 2,
+        justifyContent: "center",
+      }}
+    >
+      {favoritedRecipes.map((recipe) => (
+        <RecipeCard recipe={recipe} onClick={handleCardClick} key={recipe.id} />
       ))}
 
       {/* モーダル */}
@@ -88,6 +55,9 @@ const Favorite: React.FC = () => {
           open={modalOpen}
           onClose={handleCloseModal}
           selectedRecipe={selectedRecipe}
+          setSelectedRecipe={setSelectedRecipe}
+          setRecipes={setRecipes}
+          isLogin={true}
         />
       )}
     </Box>

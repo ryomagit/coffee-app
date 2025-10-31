@@ -36,15 +36,14 @@ const SigninForm: React.FC<OriginalProps> = ({ handleClose, setSignin }) => {
           ? ERROR_MESSAGES.password_1
           : ERROR_MESSAGES.confirmPassword_1;
     } else if (name === "mailAddress") {
-      // Usernameのバリデーション
+      // mailAddressのバリデーション
       const mailAddressRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!mailAddressRegex.test(value)) {
         error = ERROR_MESSAGES.mailaddress_2;
       }
     } else if (name === "password") {
       // Passwordのバリデーション
-      const passwordRegex =
-        /^(?=.*[A-Za-z])(?=.*\d|.*[_?!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,16}$/;
+      const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,16}$/;
       if (!passwordRegex.test(value)) {
         error = ERROR_MESSAGES.password_2;
       }

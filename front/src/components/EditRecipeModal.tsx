@@ -11,6 +11,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import CoffeeMakerRoundedIcon from "@mui/icons-material/CoffeeMakerRounded";
 import {
   brewingMethodLabels,
   ERROR_MESSAGES,
@@ -18,11 +19,11 @@ import {
   roastLevelLabels,
 } from "../Const";
 import postRequest from "../utils/HttpUtil";
-import CoffeeMakerRoundedIcon from "@mui/icons-material/CoffeeMakerRounded";
 
 interface RecipeModalProps {
   open: boolean;
   onClose: () => void;
+  selectedRecipe: CoffeeRecipe;
   setRecipes: Dispatch<SetStateAction<CoffeeRecipe[]>>;
 }
 
@@ -31,29 +32,13 @@ interface StepError {
   helperText: string;
 }
 
-const AddRecipeModal: React.FC<RecipeModalProps> = ({
+const EditRecipeModal: React.FC<RecipeModalProps> = ({
   open,
   onClose,
+  selectedRecipe,
   setRecipes,
 }) => {
-  const [formData, setFormData] = useState<CoffeeRecipeWithoutRecipeId>({
-    title: "",
-    memo: "",
-    brewingMethod: 1,
-    roastLevel: 1,
-    grindSize: 1,
-    beanAmount: 15,
-    waterTemp: 95,
-    favoriteCount: 0,
-    createdAt: "",
-    isFavorited: false,
-    isOwner: false,
-    steps: [
-      { id: 1, startTime: "00:00", waterAmount: 0 },
-      { id: 2, startTime: "", waterAmount: 0 },
-      { id: 3, startTime: "", waterAmount: 0 },
-    ], // 初期値で3つのステップ
-  });
+  const [formData, setFormData] = useState<CoffeeRecipe>(selectedRecipe);
 
   const [titleError, setTitleError] = useState<String>("");
 
@@ -106,7 +91,10 @@ const AddRecipeModal: React.FC<RecipeModalProps> = ({
     }
     setFormData({
       ...formData,
-      steps: [...formData.steps, { id: index, startTime: "", waterAmount: 0 }],
+      steps: [
+        ...formData.steps,
+        { id: index, recipeId: formData.id, startTime: "", waterAmount: 0 },
+      ],
     });
   };
 
@@ -225,8 +213,13 @@ const AddRecipeModal: React.FC<RecipeModalProps> = ({
     const requestRecipe = formData;
     const filterdSteps = formData.steps.filter((step) => step.startTime !== "");
     requestRecipe.steps = filterdSteps;
-    postRequest("/private/add", requestRecipe, (resData: CoffeeRecipe) => {
-      setRecipes((prev) => [...prev, resData]);
+    console.log(JSON.stringify({ filterdSteps }));
+    postRequest("/private/edit", requestRecipe, (resData: CoffeeRecipe) => {
+      if (resData != null) {
+        setRecipes((prev) =>
+          prev.map((recipe) => (recipe.id === resData.id ? resData : recipe))
+        );
+      }
       onClose();
     });
   };
@@ -440,7 +433,6 @@ const AddRecipeModal: React.FC<RecipeModalProps> = ({
                     },
                   }}
                   variant="standard"
-                  disabled={index == 0 ? true : false}
                 />
                 <TextField
                   label="Water Amount"
@@ -487,7 +479,7 @@ const AddRecipeModal: React.FC<RecipeModalProps> = ({
             onClick={handleSubmit}
             disabled={formData.title === ""}
           >
-            Submit
+            Edit
           </Button>
           <Button variant="outlined" color="secondary" onClick={onClose}>
             Cancel
@@ -498,4 +490,4 @@ const AddRecipeModal: React.FC<RecipeModalProps> = ({
   );
 };
 
-export default AddRecipeModal;
+export default EditRecipeModal;
